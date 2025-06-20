@@ -4,7 +4,7 @@ import { NextRequest } from 'next/server'
 interface JwtPayload {
   userId: string
   email: string
-  role: 'student' | 'parent' | 'admin'
+  role: 'student' | 'parent' | 'teacher' | 'organisation'
   firstTimeLogin: boolean
   iat: number
   exp: number
