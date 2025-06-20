@@ -18,6 +18,10 @@ const userSchema = new mongoose.Schema({
   studentId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   firstTimeLogin: { type: Boolean, default: true },
   fullName: { type: String, default: "" },
+  preferences:{
+    interests: [String],
+    style: String,
+  }
 });
 
 // Correct model export pattern:

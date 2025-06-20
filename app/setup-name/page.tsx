@@ -87,7 +87,7 @@ export default function SetupNamePage() {
           console.log('Updated token stored')
         }
         
-        console.log('About to redirect to /dashboard/student')
+        console.log('About to redirect to dashboard')
         
         // Try router.push first
         router.push('/dashboard/student')
