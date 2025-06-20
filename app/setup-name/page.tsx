@@ -117,66 +117,96 @@ export default function SetupNamePage() {
   
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-100 to-purple-200 flex flex-col items-center justify-center px-4">
-  <h1 className="text-4xl font-extrabold mb-4 text-center text-purple-800">
-    🎮 Create Your Cool Name!
-  </h1>
-  <p className="mb-6 text-lg text-gray-700 text-center">
-    Tap the letters below to build your name. (Repeat letters allowed!)
-  </p>
+    <div className="min-h-screen bg-white flex flex-col items-center justify-center px-4">
+      <img src="/jio-logo.png" alt="Jio Logo" className="absolute top-15 left-10 w-30 h-30 object-contain z-10" />
+      <h1 className="text-6xl font-extrabold mb-4 text-center">
+      <span className="text-black">What is your </span>
+      <span className="text-blue-600">Full Name?</span>
+      </h1>
 
-  {/* Name display */}
-  <div className="flex items-center gap-2 mb-6 flex-wrap justify-center">
-    <div className="flex gap-1 bg-white px-6 py-3 rounded-2xl shadow-lg min-w-[250px] text-center transition-all">
-      {name.length === 0 ? (
-        <span className="text-gray-400 italic">Your name appears here...</span>
-      ) : (
-        name.map((letter, idx) => (
-          <span key={idx} className="font-bold text-2xl text-blue-700">
-            {letter}
-          </span>
-        ))
+      <p className="mb-6 text-lg text-gray-700 text-center">
+       <br />
+      </p>
+  
+
+      {/* Colorful Draggable Letters */}
+      <div className="flex justify-center w-full mb-8">
+        <div className="flex flex-wrap justify-center gap-4 max-w-3xl">
+          {alphabet.map((letter, i) => (
+            <div
+              key={letter}
+              draggable
+              onDragStart={(e) => e.dataTransfer.setData('text/plain', letter)}
+              className="w-16 h-16 flex items-center justify-center text-2xl font-extrabold text-white rounded-full shadow-[0_4px_12px_rgba(0,0,0,0.2)] cursor-grab active:cursor-grabbing transition-transform transform hover:scale-110 relative overflow-hidden"
+              style={{
+                background: `radial-gradient(circle at top left, hsla(${(i * 30) % 360}, 70%, 80%, 0.8), hsl(${(i * 30) % 360}, 70%, 55%))`,
+              }}
+            >
+              {/* Glossy white shine */}
+              <div className="absolute top-1 left-1 w-5 h-5 bg-white opacity-40 rounded-full blur-sm pointer-events-none" />
+              <div className="absolute top-2 left-3 w-2 h-2 bg-white opacity-25 rounded-full blur-[2px] pointer-events-none" />
+              {letter}
+            </div>
+          ))}
+        </div>
+      </div>
+
+
+
+      {/* Drop Zone for Name */}
+      <div
+        onDrop={(e) => {
+          e.preventDefault()
+          const letter = e.dataTransfer.getData('text/plain')
+          if (letter) setName([...name, letter])
+        }}
+        onDragOver={(e) => e.preventDefault()}
+        className="flex items-center gap-2 mb-6 flex-wrap justify-center min-h-[80px] bg-white px-6 py-4 rounded-2xl shadow-lg min-w-[250px] text-center transition-all"
+      >
+        {name.length === 0 ? (
+          <span className="text-gray-400 italic">Drag letters here...</span>
+        ) : (
+          name.map((letter, idx) => (
+            <span
+              key={idx}
+              className="font-bold text-2xl text-blue-700 cursor-pointer hover:text-red-500"
+              onClick={() =>
+                setName(name.filter((_, i) => i !== idx))
+              }
+              title="Click to remove"
+            >
+              {letter}
+            </span>
+          ))
+        )}
+      </div>
+  
+      {/* Error */}
+      {error && (
+        <p className="text-red-500 text-sm mb-4 text-center font-medium">
+          ⚠️ {error}
+        </p>
       )}
+  
+      {/* Submit & Backspace */}
+      <div className="flex gap-4">
+        {name.length > 0 && (
+          <button
+            onClick={handleBackspace}
+            className="text-sm bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 shadow"
+          >
+            ⬅ Backspace
+          </button>
+        )}
+        <button
+          onClick={handleSubmit}
+          disabled={name.length < 3 || loading}
+          className="bg-green-600 text-white text-lg px-8 py-3 rounded-full shadow-md hover:bg-green-700 disabled:opacity-50 transition"
+        >
+          {loading ? 'Saving...' : '✅ Finish & Go to Dashboard'}
+        </button>
+      </div>
     </div>
-    {name.length > 0 && (
-      <button
-        onClick={handleBackspace}
-        className="text-sm bg-red-500 text-white px-3 py-2 rounded-lg hover:bg-red-600 shadow"
-      >
-        ⬅ Backspace
-      </button>
-    )}
-  </div>
-
-  {/* Letters grid */}
-  <div className="grid grid-cols-7 gap-3 mb-8">
-    {alphabet.map((letter) => (
-      <button
-        key={letter}
-        onClick={() => handleLetterClick(letter)}
-        className="w-12 h-12 text-xl font-semibold bg-white text-gray-800 border rounded-full shadow hover:bg-blue-100 transition"
-      >
-        {letter}
-      </button>
-    ))}
-  </div>
-
-  {/* Error */}
-  {error && (
-    <p className="text-red-500 text-sm mb-4 text-center font-medium">
-      ⚠️ {error}
-    </p>
-  )}
-
-  {/* Submit button */}
-  <button
-    onClick={handleSubmit}
-    disabled={name.length < 3 || loading}
-    className="bg-green-600 text-white text-lg px-8 py-3 rounded-full shadow-md hover:bg-green-700 disabled:opacity-50 transition"
-  >
-    {loading ? 'Saving...' : '✅ Finish & Go to Dashboard'}
-  </button>
-</div>
-
   )
+  
 }

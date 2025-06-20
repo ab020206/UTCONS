@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react'
 import { getToken, logout } from '@/lib/auth'
 import { useRouter } from 'next/navigation'
-import Image from 'next/image'
 import Link from 'next/link'
 
 export default function Home() {
@@ -12,8 +11,7 @@ export default function Home() {
 
   useEffect(() => {
     const token = getToken()
-    if (token) setIsAuthenticated(true)
-    else setIsAuthenticated(false)
+    setIsAuthenticated(!!token)
   }, [])
 
   const handleLogout = () => {
@@ -43,51 +41,59 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-8 gap-10 text-center">
-      <Image
-        className="dark:invert"
-        src="/next.svg"
-        alt="App Logo"
-        width={180}
-        height={38}
-        priority
-      />
-      <h1 className="text-3xl font-bold">Welcome to Role Auth App</h1>
-      <p className="text-gray-500 max-w-md">
-        A simple role-based authentication system built with Next.js. Choose your path below.
-      </p>
+    <main className="min-h-screen bg-white px-6 py-12 flex items-center justify-center">
+      <div className="w-full max-w-3xl bg-white rounded-3xl shadow-xl p-10 flex flex-col items-center gap-8 border border-blue-100">
+        {/* Logo / Mascot */}
+        <div className="w-20 h-20 rounded-full bg-[#0078d4] flex items-center justify-center text-white text-3xl font-bold">
+          T
+        </div>
 
-      {isAuthenticated ? (
-        <div className="flex flex-col gap-4 mt-6">
-          <button
-            onClick={goToDashboard}
-            className="bg-blue-600 text-white px-5 py-2 rounded hover:bg-blue-700"
-          >
-            Go to Dashboard
-          </button>
-          <button
-            onClick={handleLogout}
-            className="bg-red-600 text-white px-5 py-2 rounded hover:bg-red-700"
-          >
-            Logout
-          </button>
+        {/* Title */}
+        <h1 className="text-4xl font-extrabold text-[#0078d4] text-center">Welcome to Taru</h1>
+
+        {/* Description */}
+        <p className="text-gray-600 text-center max-w-xl">
+          Your intelligent gateway to student success. Built for learning, progress, and parental support on Jio PC.
+        </p>
+
+        {/* Action Buttons */}
+        {isAuthenticated ? (
+          <div className="flex flex-col gap-3 w-full max-w-sm">
+            <button
+              onClick={goToDashboard}
+              className="bg-[#0078d4] text-white font-semibold py-3 rounded-xl hover:bg-[#0064b1] transition"
+            >
+              Go to Dashboard
+            </button>
+            <button
+              onClick={handleLogout}
+              className="text-[#0078d4] border border-[#0078d4] font-semibold py-3 rounded-xl hover:bg-blue-50 transition"
+            >
+              Logout
+            </button>
+          </div>
+        ) : (
+          <div className="flex flex-col sm:flex-row gap-4 w-full max-w-sm justify-center">
+            <Link
+              href="/login"
+              className="bg-[#0078d4] text-white font-semibold py-3 rounded-xl w-full text-center hover:bg-[#0064b1] transition"
+            >
+              Login
+            </Link>
+            <Link
+              href="/register"
+              className="border border-[#0078d4] text-[#0078d4] font-semibold py-3 rounded-xl w-full text-center hover:bg-blue-50 transition"
+            >
+              Register
+            </Link>
+          </div>
+        )}
+
+        {/* Bonus: Motivation */}
+        <div className="text-sm text-gray-400 pt-4">
+          🚀 Let’s grow smarter, together.
         </div>
-      ) : (
-        <div className="flex gap-4 mt-6">
-          <Link
-            href="/login"
-            className="bg-blue-600 text-white px-5 py-2 rounded hover:bg-blue-700"
-          >
-            Login
-          </Link>
-          <Link
-            href="/register"
-            className="bg-gray-100 px-5 py-2 rounded hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700"
-          >
-            Register
-          </Link>
-        </div>
-      )}
-    </div>
+      </div>
+    </main>
   )
 }
