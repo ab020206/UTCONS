@@ -1,7 +1,9 @@
-import connectDB from '@/lib/db'
+// /app/api/auth/login/route.ts
+import { NextResponse } from 'next/server'
 import User from '@/lib/models/User'
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
+import connectDB from '@/lib/db'
 
 export async function POST(req: Request) {
   try {
@@ -9,20 +11,38 @@ export async function POST(req: Request) {
     await connectDB()
 
     const user = await User.findOne({ email })
-    if (!user) return new Response('User not found', { status: 404 })
+    if (!user) return NextResponse.json({ message: 'User not found' }, { status: 404 })
 
-    const isPasswordCorrect = await bcrypt.compare(password, user.password)
-    if (!isPasswordCorrect) return new Response('Invalid credentials', { status: 401 })
+    const isMatch = await bcrypt.compare(password, user.password)
+    if (!isMatch) return NextResponse.json({ message: 'Invalid credentials' }, { status: 401 })
+
+    console.log('User found for login:', {
+      email: user.email,
+      role: user.role,
+      firstTimeLogin: user.firstTimeLogin,
+      fullName: user.fullName
+    })
 
     const token = jwt.sign(
-      { userId: user._id, role: user.role },
+      {
+        userId: user._id,
+        role: user.role,
+        email: user.email,
+        firstTimeLogin: user.firstTimeLogin, // ✅ Include this
+      },
       process.env.JWT_SECRET!,
-      { expiresIn: '2h' }
+      { expiresIn: '1h' }
     )
 
-    return new Response(JSON.stringify({ token }), { status: 200 })
+    console.log('JWT token payload:', {
+      userId: user._id,
+      role: user.role,
+      email: user.email,
+      firstTimeLogin: user.firstTimeLogin,
+    })
+
+    return NextResponse.json({ token })
   } catch (error) {
-    console.error('Login Error:', error)
-    return new Response('Internal Server Error', { status: 500 })
+    return NextResponse.json({ message: 'Server error' }, { status: 500 })
   }
 }

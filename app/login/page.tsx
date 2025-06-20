@@ -19,9 +19,23 @@ export default function LoginPage() {
     try {
       const data = await login(email, password)
       const user = parseToken(data.token)
+      console.log('User after login:', user)
+      console.log('firstTimeLogin value:', user?.firstTimeLogin)
+      console.log('user role:', user?.role)
+
+      if (!user) {
+        throw new Error('Invalid token received')
+      }
 
       if (user?.role === 'student') {
-        router.push('/dashboard/student')
+        console.log('User is a student, firstTimeLogin:', user.firstTimeLogin)
+        if (user.firstTimeLogin) {
+          console.log('Redirecting to setup-name page')
+          router.push('/setup-name')
+        } else {
+          console.log('Redirecting to student dashboard')
+          router.push('/dashboard/student')
+        }
       } else if (user?.role === 'parent') {
         router.push('/dashboard/parent')
       } else {

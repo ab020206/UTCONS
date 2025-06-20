@@ -31,6 +31,13 @@ export async function POST(req: Request) {
       ...(role === 'parent' && { studentId }),
     })
 
+    console.log('New user created:', {
+      email: user.email,
+      role: user.role,
+      firstTimeLogin: user.firstTimeLogin,
+      fullName: user.fullName
+    })
+
     return new Response(JSON.stringify({ message: 'Registered' }), { status: 201 })
   } catch (e) {
     console.error('Register error:', e)

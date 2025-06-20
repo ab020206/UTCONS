@@ -16,6 +16,8 @@ const userSchema = new mongoose.Schema({
     default: "student",
   },
   studentId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  firstTimeLogin: { type: Boolean, default: true },
+  fullName: { type: String, default: "" },
 });
 
 // Correct model export pattern:
