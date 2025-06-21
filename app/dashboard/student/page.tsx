@@ -171,13 +171,13 @@ export default function StudentDashboard() {
             {user.preferences && (
               <div className="bg-blue-50 border border-blue-300 rounded-xl p-6 mt-6">
                 <h3 className="text-xl font-semibold text-blue-800 mb-3">🎯 Your Preferences</h3>
-                <p>
+                <p className="text-lg font-medium text-gray-700">
                   <strong>Interests:</strong>{' '}
                   {user.preferences.interests.length > 0
                     ? user.preferences.interests.join(', ')
                     : 'No interests set'}
                 </p>
-                <p className="mt-2">
+                <p className="mt-2 text-lg font-medium text-gray-700">
                   <strong>Learning Style:</strong>{' '}
                   {user.preferences.style || 'Not specified'}
                 </p>
