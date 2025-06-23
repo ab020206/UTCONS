@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { verifyToken } from '@/lib/auth'
-import dbConnect from '@/lib/db'
+import connectDB from '@/lib/db'
 import User from '@/lib/models/User'
 
 export async function POST(req: NextRequest) {
-  await dbConnect()
+  await connectDB()
 
   const user = verifyToken(req)
 

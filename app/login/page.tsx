@@ -23,9 +23,33 @@ export default function LoginPage() {
       if (!user) throw new Error('Invalid token received')
 
       if (user?.role === 'student') {
-        user.firstTimeLogin
-          ? router.push('/setup-name')
-          : router.push('/dashboard/student')
+        if (user.firstTimeLogin) {
+          // First time login - check if they have a name set
+          if (!user.fullName) {
+            router.push('/setup-name')
+          } else {
+            // Name is set but no preferences - redirect to preferences
+            router.push('/preferences')
+          }
+        } else {
+          // Check if preferences are set
+          const response = await fetch('/api/user/preferences', {
+            headers: { Authorization: `Bearer ${data.token}` }
+          })
+          
+          if (response.ok) {
+            const prefData = await response.json()
+            if (prefData.preferences && prefData.preferences.interests && prefData.preferences.interests.length > 0) {
+              router.push('/dashboard/student')
+            } else {
+              // No preferences set - redirect to preferences
+              router.push('/preferences')
+            }
+          } else {
+            // Error checking preferences - redirect to preferences
+            router.push('/preferences')
+          }
+        }
       } else if (user?.role === 'parent') {
         router.push('/dashboard/parent')
       }
@@ -104,7 +128,7 @@ export default function LoginPage() {
         </form>
 
         <div className="text-center text-sm text-gray-600 mt-6">
-          Don’t have an account?{' '}
+          Don't have an account?{' '}
           <span
             onClick={() => router.push('/')}
             className="text-[#6a0dad] font-semibold hover:underline cursor-pointer"

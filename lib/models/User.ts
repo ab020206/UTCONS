@@ -1,6 +1,24 @@
-import mongoose from "mongoose";
+import mongoose, { Document, Schema, Model } from "mongoose";
 
-const userSchema = new mongoose.Schema({
+export interface IUser extends Document {
+  email: string;
+  password?: string;
+  role: 'student' | 'parent' | 'teacher' | 'admin';
+  studentId?: mongoose.Schema.Types.ObjectId;
+  firstTimeLogin?: boolean;
+  fullName?: string;
+  preferences?: {
+    interests: string[];
+    style: string;
+  };
+  aspiration?: string;
+  xp?: number;
+  streak?: number;
+  completedModules?: string[];
+  lastLogin?: Date;
+}
+
+const UserSchema: Schema<IUser> = new mongoose.Schema({
   email: {
     type: String,
     required: true,
@@ -12,7 +30,7 @@ const userSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ["student", "parent", "teacher", "organisation"],
+    enum: ["student", "parent", "teacher", "admin"],
     default: "student",
   },
   studentId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
@@ -21,10 +39,14 @@ const userSchema = new mongoose.Schema({
   preferences:{
     interests: [String],
     style: String,
-  }
+  },
+  aspiration: { type: String, default: "" },
+  xp: { type: Number, default: 0 },
+  streak: { type: Number, default: 0 },
+  completedModules: { type: [String], default: [] },
+  lastLogin: { type: Date, default: Date.now },
 });
 
-// Correct model export pattern:
-const User = mongoose.models.User || mongoose.model("User", userSchema);
+const User: Model<IUser> = mongoose.models.User || mongoose.model<IUser>("User", UserSchema);
 
 export default User;

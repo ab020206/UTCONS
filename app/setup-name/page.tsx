@@ -90,13 +90,13 @@ export default function SetupNamePage() {
         console.log('About to redirect to dashboard')
         
         // Try router.push first
-        router.push('/dashboard/student')
+        router.push('/preferences')
         console.log('Router.push called')
         
         // Fallback: force redirect after a short delay
         setTimeout(() => {
           console.log('Fallback redirect triggered')
-          window.location.href = '/dashboard/student'
+          window.location.href = '/preferences'
         }, 1000)
       } else {
         const errorData = await res.json()

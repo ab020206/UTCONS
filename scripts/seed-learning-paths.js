@@ -1,296 +1,95 @@
 const mongoose = require('mongoose');
-require('dotenv').config();
 
-// Connect to MongoDB
-mongoose.connect(process.env.MONGODB_URI);
+// This script should be run from the root of the Taru_demo project
+// Make sure you have a .env file with MONGODB_URI or have it set in your environment
+require('dotenv').config({ path: './.env.local' });
 
-// Learning Path Schema
-const moduleSchema = new mongoose.Schema({
-  id: String,
-  title: String,
-  description: String,
-  duration: Number,
-  difficulty: String,
-  xpReward: Number,
-  isCompleted: Boolean
+// Define Schema for LearningPath
+const ModuleSchema = new mongoose.Schema({
+  moduleId: { type: String, required: true, unique: true },
+  title: { type: String, required: true },
+  description: { type: String, required: true },
+  xpValue: { type: Number, required: true, default: 20 },
 });
 
-const learningPathSchema = new mongoose.Schema({
-  interest: String,
-  title: String,
-  description: String,
-  modules: [moduleSchema],
-  totalDuration: Number,
-  totalXP: Number,
-  difficulty: String,
-  isActive: Boolean
+const LearningPathSchema = new mongoose.Schema({
+  title: { type: String, required: true, unique: true },
+  description: { type: String, required: true },
+  interest: { type: String, required: true, index: true },
+  modules: [ModuleSchema],
 });
 
-const LearningPath = mongoose.model('LearningPath', learningPathSchema);
+const LearningPath = mongoose.models.LearningPath || mongoose.model('LearningPath', LearningPathSchema);
 
+// Dummy Data
 const learningPaths = [
   {
-    interest: 'programming',
-    title: 'Python for Beginners',
-    description: 'Learn the fundamentals of Python programming with hands-on projects and real-world applications.',
-    difficulty: 'Beginner',
-    isActive: true,
+    title: 'Introduction to Web Development',
+    description: 'Learn the basics of building websites and web applications.',
+    interest: 'Technology',
     modules: [
-      {
-        id: 'py-001',
-        title: 'Introduction to Python',
-        description: 'Learn what Python is and why it\'s popular',
-        duration: 30,
-        difficulty: 'Beginner',
-        xpReward: 10,
-        isCompleted: false
-      },
-      {
-        id: 'py-002',
-        title: 'Variables and Data Types',
-        description: 'Understand how to store and manipulate data',
-        duration: 45,
-        difficulty: 'Beginner',
-        xpReward: 15,
-        isCompleted: false
-      },
-      {
-        id: 'py-003',
-        title: 'Control Flow',
-        description: 'Learn about loops and conditional statements',
-        duration: 60,
-        difficulty: 'Beginner',
-        xpReward: 20,
-        isCompleted: false
-      },
-      {
-        id: 'py-004',
-        title: 'Functions',
-        description: 'Create reusable code with functions',
-        duration: 45,
-        difficulty: 'Beginner',
-        xpReward: 15,
-        isCompleted: false
-      },
-      {
-        id: 'py-005',
-        title: 'Mini Project: Calculator',
-        description: 'Build a simple calculator using your Python skills',
-        duration: 90,
-        difficulty: 'Beginner',
-        xpReward: 25,
-        isCompleted: false
-      }
+      { moduleId: 'tech-101', title: 'HTML Basics', description: 'Learn the structure of web pages.', xpValue: 20 },
+      { moduleId: 'tech-102', title: 'CSS Fundamentals', description: 'Style your web pages.', xpValue: 25 },
+      { moduleId: 'tech-103', title: 'JavaScript Essentials', description: 'Add interactivity to your sites.', xpValue: 30 },
+      { moduleId: 'tech-104', title: 'Intro to React', description: 'Build powerful user interfaces.', xpValue: 40 },
+    ],
+  },
+  {
+    title: 'Fundamentals of Digital Art',
+    description: 'Explore the world of digital creativity and design.',
+    interest: 'Art',
+    modules: [
+        { moduleId: 'art-101', title: 'Intro to Digital Painting', description: 'Learn digital brushes and layers.', xpValue: 20 },
+        { moduleId: 'art-102', title: 'Color Theory for Artists', description: 'Understand how colors work together.', xpValue: 25 },
+        { moduleId: 'art-103', title: 'Character Design Basics', description: 'Create your own unique characters.', xpValue: 30 },
     ]
   },
   {
-    interest: 'mathematics',
-    title: 'Algebra Fundamentals',
-    description: 'Master the basics of algebra with interactive lessons and practice problems.',
-    difficulty: 'Beginner',
-    isActive: true,
+    title: 'The World of Science',
+    description: 'Discover the wonders of biology, chemistry, and physics.',
+    interest: 'Science',
     modules: [
-      {
-        id: 'alg-001',
-        title: 'Introduction to Variables',
-        description: 'Learn how to work with unknown values',
-        duration: 40,
-        difficulty: 'Beginner',
-        xpReward: 12,
-        isCompleted: false
-      },
-      {
-        id: 'alg-002',
-        title: 'Solving Linear Equations',
-        description: 'Find the value of variables in equations',
-        duration: 50,
-        difficulty: 'Beginner',
-        xpReward: 15,
-        isCompleted: false
-      },
-      {
-        id: 'alg-003',
-        title: 'Graphing Linear Functions',
-        description: 'Visualize mathematical relationships',
-        duration: 55,
-        difficulty: 'Beginner',
-        xpReward: 18,
-        isCompleted: false
-      },
-      {
-        id: 'alg-004',
-        title: 'Systems of Equations',
-        description: 'Solve multiple equations simultaneously',
-        duration: 70,
-        difficulty: 'Intermediate',
-        xpReward: 20,
-        isCompleted: false
-      }
+        { moduleId: 'sci-101', title: 'Biology: The Cell', description: 'The basic building block of life.', xpValue: 20 },
+        { moduleId: 'sci-102', title: 'Chemistry: The Atom', description: 'Understanding matter at its core.', xpValue: 25 },
+        { moduleId: 'sci-103', title: 'Physics: Forces and Motion', description: 'How the universe moves.', xpValue: 30 },
     ]
   },
   {
-    interest: 'science',
-    title: 'Physics Basics',
-    description: 'Explore the fundamental principles of physics through experiments and simulations.',
-    difficulty: 'Beginner',
-    isActive: true,
+    title: 'Exploring Mathematics',
+    description: 'Journey through the most important concepts in mathematics.',
+    interest: 'Mathematics',
     modules: [
-      {
-        id: 'phy-001',
-        title: 'Motion and Forces',
-        description: 'Understand how objects move and interact',
-        duration: 45,
-        difficulty: 'Beginner',
-        xpReward: 12,
-        isCompleted: false
-      },
-      {
-        id: 'phy-002',
-        title: 'Energy and Work',
-        description: 'Learn about different forms of energy',
-        duration: 50,
-        difficulty: 'Beginner',
-        xpReward: 15,
-        isCompleted: false
-      },
-      {
-        id: 'phy-003',
-        title: 'Waves and Sound',
-        description: 'Explore wave phenomena and sound',
-        duration: 60,
-        difficulty: 'Beginner',
-        xpReward: 18,
-        isCompleted: false
-      },
-      {
-        id: 'phy-004',
-        title: 'Electricity and Magnetism',
-        description: 'Discover electrical and magnetic forces',
-        duration: 75,
-        difficulty: 'Intermediate',
-        xpReward: 20,
-        isCompleted: false
-      }
-    ]
-  },
-  {
-    interest: 'art',
-    title: 'Digital Art Fundamentals',
-    description: 'Learn digital drawing and design principles with modern tools.',
-    difficulty: 'Beginner',
-    isActive: true,
-    modules: [
-      {
-        id: 'art-001',
-        title: 'Digital Drawing Basics',
-        description: 'Get familiar with digital art tools',
-        duration: 40,
-        difficulty: 'Beginner',
-        xpReward: 10,
-        isCompleted: false
-      },
-      {
-        id: 'art-002',
-        title: 'Color Theory',
-        description: 'Understand how colors work together',
-        duration: 35,
-        difficulty: 'Beginner',
-        xpReward: 12,
-        isCompleted: false
-      },
-      {
-        id: 'art-003',
-        title: 'Composition Principles',
-        description: 'Learn how to arrange elements effectively',
-        duration: 45,
-        difficulty: 'Beginner',
-        xpReward: 15,
-        isCompleted: false
-      },
-      {
-        id: 'art-004',
-        title: 'Character Design',
-        description: 'Create memorable characters',
-        duration: 60,
-        difficulty: 'Intermediate',
-        xpReward: 18,
-        isCompleted: false
-      }
-    ]
-  },
-  {
-    interest: 'music',
-    title: 'Music Theory for Beginners',
-    description: 'Learn to read music, understand rhythm, and compose simple melodies.',
-    difficulty: 'Beginner',
-    isActive: true,
-    modules: [
-      {
-        id: 'mus-001',
-        title: 'Reading Sheet Music',
-        description: 'Learn to read musical notation',
-        duration: 50,
-        difficulty: 'Beginner',
-        xpReward: 12,
-        isCompleted: false
-      },
-      {
-        id: 'mus-002',
-        title: 'Rhythm and Timing',
-        description: 'Master musical timing and rhythm',
-        duration: 40,
-        difficulty: 'Beginner',
-        xpReward: 10,
-        isCompleted: false
-      },
-      {
-        id: 'mus-003',
-        title: 'Scales and Chords',
-        description: 'Understand musical scales and chord progressions',
-        duration: 55,
-        difficulty: 'Beginner',
-        xpReward: 15,
-        isCompleted: false
-      },
-      {
-        id: 'mus-004',
-        title: 'Composition Basics',
-        description: 'Create your own simple melodies',
-        duration: 70,
-        difficulty: 'Intermediate',
-        xpReward: 18,
-        isCompleted: false
-      }
+        { moduleId: 'math-101', title: 'Algebra Fundamentals', description: 'The language of symbols.', xpValue: 20 },
+        { moduleId: 'math-102', title: 'Geometry and Shapes', description: 'Understanding space and form.', xpValue: 25 },
+        { moduleId: 'math-103', title: 'Introduction to Calculus', description: 'The study of change.', xpValue: 35 },
     ]
   }
 ];
 
-// Calculate total duration and XP for each path
-learningPaths.forEach(path => {
-  path.totalDuration = path.modules.reduce((sum, module) => sum + module.duration, 0);
-  path.totalXP = path.modules.reduce((sum, module) => sum + module.xpReward, 0);
-});
-
-async function seedLearningPaths() {
+async function seedDB() {
+  const MONGO_URI = process.env.MONGODB_URI;
+  if (!MONGO_URI) {
+    console.error('Error: MONGODB_URI is not defined in your environment variables.');
+    process.exit(1);
+  }
+  
   try {
-    // Clear existing learning paths
+    console.log('Connecting to database...');
+    await mongoose.connect(MONGO_URI);
+    console.log('Database connected. Seeding learning paths...');
+
     await LearningPath.deleteMany({});
-    console.log('Cleared existing learning paths');
+    console.log('Cleared existing learning paths.');
 
-    // Insert new learning paths
-    const result = await LearningPath.insertMany(learningPaths);
-    console.log(`Successfully seeded ${result.length} learning paths`);
-
-    // Display the seeded paths
-    result.forEach(path => {
-      console.log(`- ${path.title} (${path.interest}): ${path.modules.length} modules, ${path.totalDuration}min, ${path.totalXP} XP`);
-    });
+    await LearningPath.insertMany(learningPaths);
+    console.log('Database seeded with new learning paths!');
 
   } catch (error) {
-    console.error('Error seeding learning paths:', error);
+    console.error('Error seeding database:', error);
   } finally {
-    mongoose.connection.close();
+    await mongoose.connection.close();
+    console.log('Database connection closed.');
   }
 }
 
-seedLearningPaths(); 
+seedDB(); 

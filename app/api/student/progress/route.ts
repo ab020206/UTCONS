@@ -1,11 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
-import connectToDB from '@/lib/db'
-import { verifyToken } from '@/lib/auth'
+import connectToDatabase from '@/lib/db'
+import { parseToken } from '@/lib/auth'
 import Progress from '@/lib/models/Progress'
+import User from '@/lib/models/User'
 
 export async function GET(req: NextRequest) {
-  await connectToDB()
-  const user = verifyToken(req)
+  await connectToDatabase()
+  const authHeader = req.headers.get('authorization')
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return NextResponse.json({ message: 'Unauthorized' }, { status: 401 })
+  }
+  const token = authHeader.split(' ')[1]
+  const user = parseToken(token)
 
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
@@ -20,85 +26,69 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  await connectToDB()
-  const user = verifyToken(req)
+  const authHeader = req.headers.get('authorization')
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return NextResponse.json({ message: 'Unauthorized' }, { status: 401 })
+  }
+  const token = authHeader.split(' ')[1]
 
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (!token) {
+    return NextResponse.json({ message: 'Unauthorized' }, { status: 401 })
+  }
 
   try {
+    const { userId } = parseToken(token)
     const { xpEarned, moduleId } = await req.json()
 
-    if (!xpEarned || xpEarned <= 0) {
-      return NextResponse.json({ error: 'Invalid XP amount' }, { status: 400 })
+    if (!xpEarned || !moduleId) {
+      return NextResponse.json({ message: 'Missing xpEarned or moduleId' }, { status: 400 })
     }
 
-    const today = new Date()
-    today.setHours(0, 0, 0, 0) // Set to start of day
+    await connectToDatabase()
+    const user = await User.findById(userId)
 
-    // Find or create progress record
-    let progress = await Progress.findOne({ student: user.userId })
-
-    if (!progress) {
-      progress = new Progress({
-        student: user.userId,
-        xp: 0,
-        streak: 0,
-        completedModules: [],
-        history: []
-      })
+    if (!user) {
+      return NextResponse.json({ message: 'User not found' }, { status: 404 })
     }
-
-    // Update XP
-    progress.xp += xpEarned
-
-    // Add module to completed if provided
-    if (moduleId && !progress.completedModules.includes(moduleId)) {
-      progress.completedModules.push(moduleId)
-    }
-
-    // Update streak (simplified logic - you might want more sophisticated streak tracking)
-    const yesterday = new Date(today)
-    yesterday.setDate(yesterday.getDate() - 1)
     
-    const hasActivityYesterday = progress.history.some((h: { date: Date; xp: number }) => {
-      const historyDate = new Date(h.date)
-      historyDate.setHours(0, 0, 0, 0)
-      return historyDate.getTime() === yesterday.getTime() && h.xp > 0
-    })
+    // Update XP
+    user.xp = (user.xp || 0) + xpEarned
 
-    if (hasActivityYesterday) {
-      progress.streak += 1
-    } else {
-      progress.streak = 1 // Reset streak if no activity yesterday
+    // Update streak
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    const lastLogin = user.lastLogin ? new Date(user.lastLogin) : new Date(0)
+    lastLogin.setHours(0, 0, 0, 0)
+
+    const diffTime = today.getTime() - lastLogin.getTime()
+    const diffDays = diffTime / (1000 * 60 * 60 * 24)
+
+    if (diffDays === 1) {
+      user.streak = (user.streak || 0) + 1
+    } else if (diffDays > 1) {
+      user.streak = 1 // Reset streak
+    }
+    user.lastLogin = new Date()
+
+    // Add module to completed modules if not already present
+    if (!user.completedModules) {
+      user.completedModules = []
+    }
+    if (!user.completedModules.includes(moduleId)) {
+      user.completedModules.push(moduleId)
     }
 
-    // Add today's XP to history
-    const existingTodayEntry = progress.history.find((h: { date: Date; xp: number }) => {
-      const historyDate = new Date(h.date)
-      historyDate.setHours(0, 0, 0, 0)
-      return historyDate.getTime() === today.getTime()
-    })
-
-    if (existingTodayEntry) {
-      existingTodayEntry.xp += xpEarned
-    } else {
-      progress.history.push({
-        date: today,
-        xp: xpEarned
-      })
-    }
-
-    await progress.save()
+    await user.save()
 
     return NextResponse.json({
-      success: true,
-      newXP: progress.xp,
-      newStreak: progress.streak,
-      completedModules: progress.completedModules
+      message: 'Progress updated successfully',
+      xp: user.xp,
+      streak: user.streak,
+      completedModules: user.completedModules,
     })
 
   } catch (error) {
     console.error('Progress update error:', error)
-    return NextResponse.json({ error: 'Failed to update progress' }, { status: 500 })
+    return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 })
   }
 }

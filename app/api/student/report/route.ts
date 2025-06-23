@@ -1,6 +1,7 @@
 import { verifyToken, authorizeRoles } from '@/lib/auth'
 import connectDB from '@/lib/db'
 import User from '@/lib/models/User'
+import Progress from '@/lib/models/Progress'
 import { NextRequest } from 'next/server'
 
 export async function GET(req: NextRequest) {
@@ -30,13 +31,25 @@ export async function GET(req: NextRequest) {
       })
     }
 
-    // 📨 Send only safe student data
+    // 📊 Fetch student progress data
     const student = parent.studentId
+    const progress = await Progress.findOne({ student: student._id })
+
+    // 📨 Send comprehensive student data including progress
     const responseData = {
       _id: student._id,
       email: student.email,
+      fullName: student.fullName,
       role: student.role,
-      // Include more fields as needed
+      preferences: student.preferences,
+      progress: {
+        xp: progress?.xp || 0,
+        streak: progress?.streak || 0,
+        completedModules: progress?.completedModules || [],
+        totalModules: 10,
+        history: progress?.history || []
+      },
+      parentAspiration: parent.aspiration || ''
     }
 
     return new Response(JSON.stringify(responseData), {
